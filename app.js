@@ -18,6 +18,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+// 设置静态文件
 app.use(express.static(path.join(__dirname, 'public')));
 
 // catch 404 and forward to error handler

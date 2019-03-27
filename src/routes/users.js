@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { code2Session } = require('../middleware/request');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -8,7 +9,10 @@ router.get('/', function(req, res, next) {
 
 // GET /shoes?order=desc&shoe[color]=blue&shoe[type]=converse
 router.get('/login', (req, res) => {
-  console.log(req)
+  const { code } = req.query;
+  code2Session(code, (error, response, data) => {
+    console.log(data)
+  });
   res.send(req.query.code.toString())
 });
 
