@@ -13,7 +13,7 @@ mongoose.Promise = require('bluebird'); // 让mongoose支持Promise
 
 mongoose.connect(mongodUrl, { useNewUrlParser: true });
 const db = mongoose.connection;
-db.on('error', console.error('connection error: '));
+db.on('error', () => console.error('connection error: '));
 db.once('open', () => {
   console.log('connection successfully: ', mongodUrl);
 });

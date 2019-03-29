@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const moment = require('moment');
-const Schema = require('../middleware/schema');
+const SchemaGenerator = require('../middleware/schema');
+const Schema = mongoose.Schema;
 
 let id = mongoose.Types.ObjectId;
 
@@ -15,7 +16,7 @@ const found = {
   }
 };
 
-const FoundSchema = Schema(found);
+const FoundSchema = SchemaGenerator(found);
 FoundSchema.virtual('time').get(() => {
   return moment(this.createTime).fromNow()
 });

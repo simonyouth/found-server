@@ -2,9 +2,9 @@
 用户
  */
 const moment = require('moment');
-const Schema = require('../middleware/schema');
+const SchemaGenerator = require('../middleware/schema');
 const users = {
-  id: {
+  _id: {
     type: String,
   },
   createTime: {
@@ -17,6 +17,6 @@ const users = {
   }
 };
 
-const UserSchema = Schema(users);
+const UserSchema = SchemaGenerator(users);
 
 module.exports = UserSchema;
