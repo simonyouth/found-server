@@ -15,6 +15,12 @@ router.get('/login', (req, res) => {
   const { code } = req.query;
   code2Session(code, (error, response, data) => {
     const { session_key, openid } = JSON.parse(data);
+    // 存入session
+    req.session.openId = openid;
+    req.session.user = {
+      openId: openid,
+      sessionKey: session_key,
+    };
     isNewUser(openid).then(list => {
       if (!list) {
         // 新用户，插入User表
