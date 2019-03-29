@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const moment = require('moment');
-const SchemaGenerator = require('../middleware/schema');
-const Schema = mongoose.Schema;
+const { SchemaGenerator, Schema } = require('../middleware/schema');
 
 let id = mongoose.Types.ObjectId;
 
@@ -10,7 +9,35 @@ const found = {
     type: Schema.Types.ObjectId,
     default: id,
   },
+  location: {
+    type: Object,
+    required: true,
+  },
+  title: {
+    type: String,
+    required: true,
+  },
+  content: {
+    type: String,
+    required: true,
+  },
+  creator: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  category: {
+    type: String,
+  },
+  isDelete: {
+    type: Boolean,
+    default: false,
+  },
   createTime: {
+    type: Date,
+    default: moment().local()
+  },
+  updateTime: {
     type: Date,
     default: moment().local()
   }

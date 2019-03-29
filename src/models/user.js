@@ -2,9 +2,20 @@
 用户
  */
 const moment = require('moment');
-const SchemaGenerator = require('../middleware/schema');
+const { SchemaGenerator } = require('../middleware/schema');
 const users = {
   _id: {
+    type: String,
+  },
+  avatarUrl: {
+    type: String,
+    required: true,
+  },
+  nickName: {
+    type: String,
+    required: true,
+  },
+  phoneNumber: {
     type: String,
   },
   createTime: {
