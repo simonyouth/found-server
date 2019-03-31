@@ -11,9 +11,15 @@ const users = {
     type: String,
     required: true,
   },
+  gender: {
+    type: Number,
+  },
   nickName: {
     type: String,
     required: true,
+  },
+  city: {
+    type: String,
   },
   phoneNumber: {
     type: String,

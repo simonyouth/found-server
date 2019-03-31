@@ -6,6 +6,6 @@ const { User } = require('../db');
 
 module.exports = {
   isNewUser: (id) => {
-    return User.findOne({ id })
+    return User.findOne({ _id: id })
   }
 };
