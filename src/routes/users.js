@@ -42,29 +42,33 @@ router.post('/decodeUserInfo', (req, res) => {
     avatarUrl,
   } = info;
   isNewUser(openId).then(list => {
+    let getId;
     if (!list) {
       // 新用户，插入User表
-      User.create({
-        _id: openId,
+      getId = User.create({
+        openId: openId,
         avatarUrl,
         gender,
         nickName,
         city: `${province}-${city}`,
-      }).then(() => {
-        res.send({
-          httpCode: 200,
-          success: true,
-          msg: 'register success',
-        })
-      })
+      });
     } else {
+      getId = User.findOne({ openId })
+    }
+    getId.then(({ _id }) => {
+      // 使用自动生成的_id作为标识而不是openId
+      req.session.user.id = _id;
       res.send({
         httpCode: 200,
         success: true,
-        msg: 'login success',
+        id: _id,
       })
-    }
+    })
   });
 });
 
+// GET users/info
+router.get('/info', (req, res) => {
+  const { id } = req.query;
+});
 module.exports = router;
