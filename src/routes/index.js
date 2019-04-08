@@ -18,5 +18,6 @@
  */
 
 module.exports = (app) => {
-  app.use('/users', require('./users'))
+  app.use('/users', require('./users'));
+  app.use('/letter', require('./letter'));
 };

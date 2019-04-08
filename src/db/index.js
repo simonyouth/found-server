@@ -20,8 +20,10 @@ db.once('open', () => {
 
 const User = mongoose.model('User', models.User, 'users');
 const Found = mongoose.model('Found', models.Found, 'founds');
+const Letter = mongoose.model('Letter', models.Letter, 'letters');
 
 module.exports = {
   User,
   Found,
+  Letter,
 };
