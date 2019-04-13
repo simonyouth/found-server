@@ -1,5 +1,5 @@
 /*
-寻物启事
+失物招领
  */
 const express = require('express');
 const moment = require('moment');
@@ -7,26 +7,23 @@ const router = express.Router();
 const db = require('../db');
 const { Schema } = require('../middleware/schema');
 const ObjectId = Schema.Types.ObjectId;
-const Found = db.Found;
 
-// POST found/publish
+const Lost = db.Lost;
+
+// POST lost/publish
 router.post('/publish', (req, res) => {
   const {
     title,
     location,
     content,
-    money = null,
     category,
-    imgList = [],
   } = req.body;
   const { id } = req.session.user;
   console.log(id)
-  Found.create({
+  Lost.create({
     title,
     location,
     content,
-    imgList,
-    money: Number(money),
     category: Number(category),
     creator: id,
   }).then(doc => {
@@ -37,15 +34,15 @@ router.post('/publish', (req, res) => {
     })
   })
     .catch(e => {
-    res.send({
-      httCode: 502,
-      success: false,
-      msg: e.message,
+      res.send({
+        httCode: 502,
+        success: false,
+        msg: e.message,
+      })
     })
-  })
 });
 
-// 寻物贴, 使用id自增进行分页查询
+// GET lost/list 寻物贴, 使用id自增进行分页查询
 router.get('/list', (req, res) => {
   const {
     size = 8,
@@ -74,12 +71,12 @@ router.get('/list', (req, res) => {
       category,
     }
   }
-  const listPromise = Found.find(filter, {}, { lean: true })
+  const listPromise = Lost.find(filter, {}, { lean: true })
     .sort({
       createTime: timeOrder,
     })
     .limit(size)
-    .skip(pageNum)
+    .skip(pageNum * size)
     .populate('creator', 'avatarUrl nickName');
 
   listPromise.then(doc => {

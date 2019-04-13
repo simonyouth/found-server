@@ -4,7 +4,7 @@ const { SchemaGenerator, Schema } = require('../middleware/schema');
 
 let id = mongoose.Types.ObjectId;
 
-const found = {
+const lost = {
   _id: {
     type: Schema.Types.ObjectId,
     default: id,
@@ -30,12 +30,6 @@ const found = {
     type: Number,
     required: true,
   },
-  money: {
-    type: Number,
-  },
-  imgList: {
-    type: Array,
-  },
   msgList: {
     type: Array,
     default: [],
@@ -54,10 +48,8 @@ const found = {
   }
 };
 
-const FoundSchema = SchemaGenerator(found);
-// vr里的数据在本条数据创建时就确定了，不会随时间的变化而更改
-// FoundSchema.virtual('time').get(() => {
-//   return moment(this.createTime).fromNow()
-// });
+const LostSchema = SchemaGenerator(lost);
+// LostSchema.virtual('time')
+//   .get(() => moment(this.createTime).fromNow())
 
-module.exports = FoundSchema;
+module.exports = LostSchema;

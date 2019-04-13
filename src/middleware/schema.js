@@ -14,8 +14,10 @@ module.exports = {
       timestamps: {
         createdAt: 'createTime',
         updatedAt: 'updateTime',
-      }
-    })
+      },
+      toObject: {virtuals: true},
+      toJSON: { virtuals: true }
+    });
   },
   Schema,
 };
