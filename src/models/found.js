@@ -10,7 +10,7 @@ const found = {
     default: id,
   },
   location: {
-    type: Object,
+    type: String,
     required: true,
   },
   title: {
@@ -27,7 +27,18 @@ const found = {
     required: true,
   },
   category: {
-    type: String,
+    type: Number,
+    required: true,
+  },
+  money: {
+    type: Number,
+  },
+  imgList: {
+    type: Array,
+  },
+  msgList: {
+    type: Array,
+    default: [],
   },
   isDelete: {
     type: Boolean,
@@ -47,3 +58,5 @@ const FoundSchema = SchemaGenerator(found);
 FoundSchema.virtual('time').get(() => {
   return moment(this.createTime).fromNow()
 });
+
+module.exports = FoundSchema;

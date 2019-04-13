@@ -30,10 +30,10 @@ router.get('/login', (req, res) => {
 
 // Post user/decodeUserInfo
 router.post('/decodeUserInfo', (req, res) => {
-  const { iv, encrytedData } = req.body;
+  const { iv, encryptedData } = req.body;
   const { sessionKey, openId } = req.session.user;
   const wxEncode = new WXEncodeData(sessionKey);
-  const info = wxEncode.decrypt(encrytedData, iv);
+  const info = wxEncode.decrypt(encryptedData, iv);
   const {
     nickName,
     gender,
