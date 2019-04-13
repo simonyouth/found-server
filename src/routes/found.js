@@ -2,6 +2,7 @@
 寻物启事
  */
 const express = require('express');
+const Promise = require('bluebird');
 const moment = require('moment');
 const router = express.Router();
 const db = require('../db');
@@ -81,8 +82,9 @@ router.get('/list', (req, res) => {
     .limit(size)
     .skip(pageNum)
     .populate('creator', 'avatarUrl nickName');
-
-  listPromise.then(doc => {
+  const countPromise = Found.countDocuments();
+  Promise.all([countPromise, listPromise]).then(success => {
+    const [ total, doc ] = success;
     const result = doc.map(v => {
       const temp = {
         creator: v.creator,
@@ -97,6 +99,7 @@ router.get('/list', (req, res) => {
       httpCode: 200,
       success: true,
       list: result,
+      total,
     })
   }).catch(e => {
     res.send({

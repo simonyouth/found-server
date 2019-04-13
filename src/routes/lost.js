@@ -2,6 +2,7 @@
 失物招领
  */
 const express = require('express');
+const Promise = require('bluebird');
 const moment = require('moment');
 const router = express.Router();
 const db = require('../db');
@@ -71,6 +72,7 @@ router.get('/list', (req, res) => {
       category,
     }
   }
+  const countPromise = Lost.countDocuments();
   const listPromise = Lost.find(filter, {}, { lean: true })
     .sort({
       createTime: timeOrder,
@@ -79,7 +81,8 @@ router.get('/list', (req, res) => {
     .skip(pageNum * size)
     .populate('creator', 'avatarUrl nickName');
 
-  listPromise.then(doc => {
+  Promise.all([countPromise, listPromise]).then((success) => {
+    const [ total, doc ] = success;
     const result = doc.map(v => {
       const temp = {
         creator: v.creator,
@@ -94,12 +97,13 @@ router.get('/list', (req, res) => {
       httpCode: 200,
       success: true,
       list: result,
+      total,
     })
   }).catch(e => {
     res.send({
       httpCode: 200,
       success: false,
-      msg: '查询失败'
+      msg: e,
     })
   })
 });
