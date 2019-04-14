@@ -46,11 +46,11 @@ const found = {
   },
   createTime: {
     type: Date,
-    default: moment().local()
+    default: moment()
   },
   updateTime: {
     type: Date,
-    default: moment().local()
+    default: moment()
   }
 };
 
