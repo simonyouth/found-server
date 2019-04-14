@@ -38,6 +38,10 @@ const lost = {
     type: Boolean,
     default: false,
   },
+  isSolve: {
+    type: Boolean,
+    default: false,
+  },
   createTime: {
     type: Date,
     default: moment()

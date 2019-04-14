@@ -64,6 +64,7 @@ router.get('/list', (req, res) => {
       { title: { $regex: new RegExp(keyWords, 'i') }},
       { content: { $regex: new RegExp(keyWords, 'i') }}
     ],
+    isDelete: false,
   };
   // if (lastId) {
   //   filter['_id'] = {
@@ -80,7 +81,7 @@ router.get('/list', (req, res) => {
       createTime: timeOrder,
     })
     .limit(size)
-    .skip(pageNum)
+    .skip(Number(pageNum) * size)
     .populate('creator', 'avatarUrl nickName');
   const countPromise = Found.countDocuments();
   Promise.all([countPromise, listPromise]).then(success => {
@@ -89,10 +90,12 @@ router.get('/list', (req, res) => {
       const temp = {
         creator: v.creator,
         time: moment(v.createTime).fromNow(),
-        timeDetail: moment(v.createTime).format('MM-DD HH:mm:ss')
+        timeDetail: moment(v.createTime).format('MM-DD HH:mm:ss'),
+        type: 'found'
       };
       delete v.createTime;
       delete v.updateTime;
+      delete v.isDelete;
       return { ...temp, ...v };
     });
     res.send({
@@ -105,9 +108,57 @@ router.get('/list', (req, res) => {
     res.send({
       httpCode: 200,
       success: false,
-      msg: '查询失败'
+      msg: e.message
     })
   })
+});
+router.put('/post/manage', (req, res) => {
+  const { type, id } = req.body;
+  let promise;
+  if (type === 'delete') {
+    promise = Found.findOneAndUpdate({ _id: id }, { isDelete: true })
+  } else {
+    promise = Found.findOneAndUpdate({ _id: id }, { isSolve: true })
+  }
+  promise.then(doc => {
+    res.send({
+      httpCode: 200,
+      success: true,
+      msg: '操作成功'
+    })
+  }).catch(e => {
+    res.send({
+      httpCode: 200,
+      success: false,
+      msg: e.message,
+    })
+  })
+});
+router.post('/post/add/msg', (req, res) => {
+  const {
+    id,
+    content,
+  } = req.body;
+  Found.findById(id)
+    .then(list => {
+      const { msgList } = list;
+      Found.findOneAndUpdate({ _id: id }, {
+        msgList: [...msgList, content],
+      }, { new: true }).then(doc => {
+        res.send({
+          httpCode: 200,
+          success: true,
+          list: doc,
+        })
+      })
+    })
+    .catch(e => {
+      res.send({
+        httpCode: 200,
+        success: false,
+        msg: e.message,
+      })
+    })
 });
 
 module.exports = router;
