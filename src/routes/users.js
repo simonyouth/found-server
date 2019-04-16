@@ -21,9 +21,12 @@ router.get('/login', (req, res) => {
       openId: openid,
       sessionKey: session_key,
     };
-    res.send({
-      httpCode: 200,
-      success: true,
+    User.findOne({openId: openid}).then(doc => {
+      res.send({
+        httpCode: 200,
+        success: true,
+        id: doc._id,
+      })
     })
   });
 });
