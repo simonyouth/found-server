@@ -10,7 +10,10 @@ const logger = require('morgan');
 
 const router = require('./src/routes');
 const { mongodUrl } = require('./config');
+const { initWebSocket } = require('./src/middleware/ws');
 const app = express();
+
+initWebSocket();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'src/views'));

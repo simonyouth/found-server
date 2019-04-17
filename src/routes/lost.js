@@ -96,6 +96,7 @@ router.get('/list', (req, res) => {
       delete v.isDelete;
       return { ...temp, ...v };
     });
+    console.log(result)
     res.send({
       httpCode: 200,
       success: true,
