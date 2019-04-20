@@ -39,7 +39,7 @@ router.get('/all', (req, res) => {
   if (id) {
     // 查询发送者或接受者为当前用户
     promise = Letter.find({
-      $or: [{ creator: id }, { receiver: id }],
+      $or: [{ creator: id }, { receiver: id, receiverStatus: { $ne: 3 }}],
     }, {}, { lean: true })
       .populate('creator receiver', '_id nickName avatarUrl');
 
@@ -47,7 +47,7 @@ router.get('/all', (req, res) => {
       // 获取指定用户的对话
       promise = Letter.find({
         $or: [
-          { creator: receiver, receiver: id },
+          { creator: receiver, receiver: id, receiverStatus: { $ne: 3 }},
           { creator: id, receiver: receiver},
         ]
       }, {}, { lean: true }).populate('creator receiver', '_id nickName avatarUrl');
@@ -115,4 +115,31 @@ router.get('/unread', (req, res) => {
   })
 });
 
+// 已读
+router.put('/changestatus', (req, res)=> {
+  const {
+    receiver,
+    type = 'read',
+  } = req.body;
+  const { id } = req.session.user;
+  // 默认全部标为已读
+  let filter = [{ receiver: id, receiverStatus: 1 }, { receiverStatus: 2 }];
+  if (type === 'read') {
+    // 指定对话已读
+    filter[0].creator = receiver;
+  }
+  // else if (type === 'delete') {
+  //   filter = [{
+  //     $or: [{ creator: id, receiver: receiver, creatorStatus: {$ne: 3}},
+  //       { creator: receiver, receiver: id, receiverStatus: {$ne: 3}}]
+  //   }, {}];
+  // }
+  Letter.updateMany(...filter)
+    .then(doc => {
+      res.send({
+        success: true,
+        data: doc,
+      })
+    })
+});
 module.exports = router;

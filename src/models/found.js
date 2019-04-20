@@ -40,6 +40,10 @@ const found = {
     type: Array,
     default: [],
   },
+  starList: {
+    type: Array,
+    default: [],
+  },
   isDelete: {
     type: Boolean,
     default: false,
@@ -50,11 +54,11 @@ const found = {
   },
   createTime: {
     type: Date,
-    default: moment()
+    default: moment().local()
   },
   updateTime: {
     type: Date,
-    default: moment()
+    default: moment().local()
   }
 };
 

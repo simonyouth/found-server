@@ -27,6 +27,7 @@ router.post('/publish', (req, res) => {
     content,
     category: Number(category),
     creator: id,
+    createTime: moment().local(),
   }).then(doc => {
     res.send({
       httpCode: 200,
@@ -53,6 +54,8 @@ router.get('/list', (req, res) => {
     timeOrder = -1,
     category,
   } = req.query;
+  const id = req.session && req.session.user && req.session.user.id;
+
   const filter = {
     location: {
       $regex: new RegExp(location, 'i'),
@@ -69,14 +72,12 @@ router.get('/list', (req, res) => {
   //   }
   // };
   if (category) {
-    filter.category = {
-      category,
-    }
+    filter.category = Number(category);
   }
-  const countPromise = Lost.countDocuments();
+  const countPromise = Lost.countDocuments(filter);
   const listPromise = Lost.find(filter, {}, { lean: true })
     .sort({
-      createTime: timeOrder,
+      updateTime: timeOrder,
     })
     .limit(size)
     .skip(Number(pageNum) * size)
@@ -87,13 +88,15 @@ router.get('/list', (req, res) => {
     const result = doc.map(v => {
       const temp = {
         creator: v.creator,
-        time: moment(v.createTime).fromNow(),
-        timeDetail: moment(v.createTime).format('MM-DD HH:mm:ss'),
+        updateAt: moment(v.updateTime).fromNow(),
+        createAt: moment(v.createTime).format('MM-DD HH:mm:ss'),
         type: 'lost',
+        isStar: v.starList && v.starList.indexOf(id) > -1,
       };
       delete v.createTime;
       delete v.updateTime;
       delete v.isDelete;
+      delete v.starList;
       return { ...temp, ...v };
     });
     console.log(result)
@@ -107,7 +110,7 @@ router.get('/list', (req, res) => {
     res.send({
       httpCode: 200,
       success: false,
-      msg: e,
+      msg: e.message,
     })
   })
 });
@@ -117,9 +120,9 @@ router.put('/post/manage', (req, res) => {
   const { type, id } = req.body;
   let promise;
   if (type === 'delete') {
-    promise = Lost.findOneAndUpdate({ _id: id }, { isDelete: true })
+    promise = Lost.findOneAndUpdate({ _id: id }, { isDelete: true, updateTime: moment().local()})
   } else {
-    promise = Lost.findOneAndUpdate({ _id: id }, { isSolve: true })
+    promise = Lost.findOneAndUpdate({ _id: id }, { isSolve: true, updateTime: moment().local() })
   }
   promise.then(doc => {
     res.send({
@@ -146,11 +149,12 @@ router.post('/post/add/msg', (req, res) => {
       const { msgList } = list;
       Lost.findOneAndUpdate({ _id: id }, {
         msgList: [...msgList, content],
+        updateTime: moment().local(),
       }, { new: true }).then(doc => {
         res.send({
           httpCode: 200,
           success: true,
-          list: doc,
+          list: doc.msgList,
         })
       })
     })
@@ -162,4 +166,24 @@ router.post('/post/add/msg', (req, res) => {
       })
     })
 });
+
+// POST lost/post/star?postId={postId} 收藏
+router.post('/post/star', (req, res) => {
+  const { id } = req.session.user;
+  const { postId } = req.body;
+  Lost.findOneAndUpdate({ _id: postId}, {
+    $push: { starList: id }
+  }).then(doc => {
+    res.send({
+      success: true,
+      data: doc,
+    })
+  }).catch(e => {
+    res.send({
+      success: false,
+      msg: e.message,
+    })
+  })
+});
+
 module.exports = router;

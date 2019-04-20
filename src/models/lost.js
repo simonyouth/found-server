@@ -34,6 +34,10 @@ const lost = {
     type: Array,
     default: [],
   },
+  starList: {
+    type: Array,
+    default: [],
+  },
   isDelete: {
     type: Boolean,
     default: false,
@@ -44,11 +48,11 @@ const lost = {
   },
   createTime: {
     type: Date,
-    default: moment()
+    default: moment().local()
   },
   updateTime: {
     type: Date,
-    default: moment()
+    default: moment().local()
   }
 };
 
