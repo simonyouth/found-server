@@ -1,4 +1,5 @@
 const express = require('express');
+const moment = require('moment');
 const router = express.Router();
 const db = require('../db');
 const { code2Session } = require('../utils/request');
@@ -6,6 +7,8 @@ const WXEncodeData = require('../utils/WXEncodeData');
 const { isNewUser } = require('../middleware/checkUser');
 
 const User = db.User;
+const Lost = db.Lost;
+const Found = db.Found;
 
 router.get('/', function(req, res, next) {
   res.render('index', {title: '2333'});
@@ -76,5 +79,73 @@ router.post('/decodeUserInfo', (req, res) => {
 // GET users/info
 router.get('/info', (req, res) => {
   const { id } = req.query;
+});
+
+router.get('/post/:type', (req, res) => {
+  const { id } = req.session.user;
+  const { type } = req.params;
+
+  let filter = [];
+  let promiseArr = [];
+  if (type === 'publish') {
+    filter = [
+      { creator: id },
+      { isDelete: false },
+      { lean: true }
+    ];
+    promiseArr = [
+      Lost.find(...filter).populate('creator', 'avatarUrl nickName'),
+      Found.find(...filter).populate('creator', 'avatarUrl nickName')
+    ];
+  } else if (type === 'star') {
+    // starList中是否存在当前id
+    promiseArr = [
+      Lost.where("starList").in([id]).populate('creator', 'avatarUrl nickName').lean(),
+      Found.where('starList').in([id]).populate('creator', 'avatarUrl nickName').lean()
+    ]
+  }
+
+  Promise.all(promiseArr)
+    .then(docs => {
+      let [ lost, found ] = docs;
+      lost = lost.map(v => {
+        const temp = {
+          creator: v.creator,
+          updateAt: moment(v.updateTime).fromNow(),
+          createAt: moment(v.createTime).format('MM-DD HH:mm:ss'),
+          type: 'lost',
+          isStar: v.starList && v.starList.indexOf(id) > -1,
+        };
+        delete v.createTime;
+        delete v.updateTime;
+        delete v.isDelete;
+        delete v.starList;
+        return { ...temp, ...v };
+      });
+      found = found.map( v => {
+        const temp = {
+          creator: v.creator,
+          updateAt: moment(v.updateTime).fromNow(),
+          createAt: moment(v.createTime).format('MM-DD HH:mm:ss'),
+          type: 'found',
+          isStar: v.starList && v.starList.indexOf(id) > -1,
+        };
+        delete v.createTime;
+        delete v.updateTime;
+        delete v.isDelete;
+        delete v.starList;
+        return { ...temp, ...v };
+      });
+      res.send({
+        success: true,
+        list: [...lost,...found]
+      })
+    })
+    .catch(e => {
+      res.send({
+        success: false,
+        msg: e.message,
+      })
+    })
 });
 module.exports = router;
