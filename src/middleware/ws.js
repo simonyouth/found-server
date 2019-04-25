@@ -28,11 +28,15 @@ function initWebSocket() {
     ws.on('message', (res) => {
       const data = JSON.parse(res);
       // // 会话期间首次连接
-      // if (isNewConn(data.id)) {
+      if (isNewConn(data.id)) {
         clients[data.id] = ws;
-      // }
-console.log(data)
-      //
+      }
+    });
+
+    ws.on('close', (res) => {
+      // 删除对应的客户端
+      removeClosed(ws);
+      console.log('close..')
     })
   })
 }
@@ -40,14 +44,19 @@ console.log(data)
 function isNewConn(id) {
   return !clients.hasOwnProperty(id);
 }
-
-function sendMessage(id) {
-  const ws = clients[id];
-  // console.log(ws.readyState)
-  if (ws) {
-    ws.readyState === 1 ? ws.send('有消息啦') : delete clients[id];
+function removeClosed(ws) {
+  for (const key in clients) {
+    if (clients[key] === ws) {
+      delete clients[key];
+    }
   }
-    // ( ws && ws.isAlive) ? ws.send('有消息啦') : delete clients[id];
+}
+
+function sendMessage(receiver, data) {
+  const ws = clients[receiver];
+  if (ws) {
+    ws.send(JSON.stringify(data))
+  }
 }
 
 module.exports = {

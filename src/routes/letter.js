@@ -10,6 +10,7 @@ const { sendMessage } = require('../middleware/ws');
 
 const ObjectId = Schema.Types.ObjectId;
 const Letter = db.Letter;
+const User = db.User;
 
 // POST letter/send?receiver=id&content=content&type='text'
 router.post('/send', (req, res) => {
@@ -22,7 +23,31 @@ router.post('/send', (req, res) => {
     creator: id,
   })
     .then(doc => {
-      sendMessage(receiver);
+      // 获取creator信息
+      const currentUser = User.findById(id);
+      // 获取receiver信息
+      const receiverUser = User.findById(receiver);
+      Promise.all([currentUser, receiverUser]).then(users => {
+        const [ c, r ] = users;
+        // 通过websocket发送消息到目标用户
+        sendMessage(receiver, {
+          content,
+          type,
+          receiver: {
+            _id: r._id,
+            nickName: r.nickName,
+            avatarUrl: r.avatarUrl,
+          },
+          creator: {
+            _id: id,
+            nickName: c.nickName,
+            avatarUrl:c.avatarUrl,
+          },
+          createTime: moment().local().format('MM-DD HH:MM:SS')
+        });
+
+      });
+
       res.send({
         httpCode: 200,
         success: true,
